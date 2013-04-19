@@ -10,8 +10,6 @@
 #include <stdlib.h>
 
 #include "config.h"	/* Always first, defines CFG_EXTAL for jz4740.h */
-#include "jz4740.h"
-
 #include "board.h"
 #include "nand.h"
 #include "serial.h"

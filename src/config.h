@@ -22,8 +22,6 @@
 
 #define CPU_ID				0x4740
 #define CFG_EXTAL			12000000
-#define CFG_CPU_SPEED		336000000
-#define UART_BASE			UART0_BASE
 #define CONFIG_BAUDRATE		57600
 #define SDRAM_BW16			0
 #define SDRAM_BANK4			1
@@ -66,6 +64,15 @@
 #define FAT_BOOTFILE_ALT_EXT	"BAK"
 
 #define LD_ADDR				0x80600000
+
+/* Board-specific config */
+#if defined (BOARD_gcw0)
+#include "config-gcw0.h"
+#elif defined (BOARD_a320)
+#include "config-a320.h"
+#else
+#error "No config for your board"
+#endif
 
 #endif
 

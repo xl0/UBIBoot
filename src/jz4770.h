@@ -43,7 +43,7 @@ typedef unsigned long ulong;
 		:				\
 		: "r" (base),			\
 		  "i" (op));
-#if 0
+
 static inline void jz_flush_dcache(void)
 {
 	unsigned long start;
@@ -69,7 +69,7 @@ static inline void jz_flush_icache(void)
 		start += CFG_CACHELINE_SIZE;
 	}
 }
-#endif
+
 /* cpu pipeline flush */
 static inline void jz_sync(void)
 {
@@ -4766,8 +4766,9 @@ static __inline__ unsigned int __cpm_get_pllout(void)
 	return pllout;
 }
 
+#if 0
 /* PLL output frequency */
-static  unsigned int __cpm_get_pll1out(void)
+static unsigned int __cpm_get_pll1out(void)
 {
 	unsigned long m, n, no, pllout;
 	unsigned long cppcr1 = REG_CPM_CPPCR1;
@@ -4786,6 +4787,7 @@ static  unsigned int __cpm_get_pll1out(void)
 		pllout = JZ_EXTAL;
 	return pllout;
 }
+#endif
 
 /* PLL output frequency for MSC/I2S/LCD/USB */
 static __inline__ unsigned int __cpm_get_pllout2(void)
