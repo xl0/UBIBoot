@@ -1,8 +1,9 @@
 
 #include <string.h>
 
+#include "config.h"
 #include "board.h"
-#include "jz4770.h"
+#include "serial.h"
 #include "DDR2_H5PS1G63EFR-S6C.h"
 
 #define PIN_X (32*4 + 28)		/* Port 4 pin 28: X button */
@@ -10,7 +11,6 @@
 #define PIN_BKLIGHT	(32*4+1)	/* Port 4 pin 1: Backlight PWM  */
 
 #define CFG_EXTAL 12000000
-#define CFG_CPU_SPEED 1020000000
 
 /* Authorized values: 1 2 3 4 6 8 12 */
 #define CFG_CDIV  1
@@ -67,7 +67,7 @@ static void pll_init(void)
 	if (BS(CFG_CPU_SPEED))
 		reg |= CPM_CPPCR_PLL_BS_BIT;
 	REG_CPM_CPPCR = reg;
-	
+
 	/* Wait for a stable output */
 	while (!__cpm_pll_is_on());
 	while (!(REG_CPM_CPPCR & CPM_CPPCR_PLLS));
@@ -278,7 +278,7 @@ static void sdram_init(void)
 
 	/* Enable DLL Detect */
 	REG_DDRC_DQS = DDRC_DQS_AUTO | DDRC_DQS_DET | DDRC_DQS_SRDET;
-	
+
 	/* Auto Refresh */
 	REG_DDRC_LMR = DDRC_LMR_CMD_AUREF | DDRC_LMR_START;
 	udelay(500);
@@ -293,6 +293,11 @@ void board_init(void)
 	pll_init();
 	sdram_init();
 
+#ifdef USE_SERIAL
+	__gpio_as_uart2();
+	__cpm_start_uart2();
+	serial_init();
+#endif
 	__cpm_start_msc0();
 	__cpm_select_msc_clk(0, 1);
 	__msc_set_rdto(0xffff);
@@ -331,8 +336,22 @@ unsigned int get_memory_size(void)
 }
 
 #ifdef USE_SERIAL
-/* TODO: fill that function */
 void serial_setbrg(void)
 {
+	volatile u8 *uart_lcr = (u8 *)(UART_BASE + OFF_LCR);
+	volatile u8 *uart_dlhr = (u8 *)(UART_BASE + OFF_DLHR);
+	volatile u8 *uart_dllr = (u8 *)(UART_BASE + OFF_DLLR);
+	u32 baud_div, tmp;
+
+	baud_div = CFG_EXTAL / 16 / CONFIG_BAUDRATE;
+	tmp = *uart_lcr;
+	tmp |= UART_LCR_DLAB;
+	*uart_lcr = tmp;
+
+	*uart_dlhr = (baud_div >> 8) & 0xff;
+	*uart_dllr = baud_div & 0xff;
+
+	tmp &= ~UART_LCR_DLAB;
+	*uart_lcr = tmp;
 }
 #endif
